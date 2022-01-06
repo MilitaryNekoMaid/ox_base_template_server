@@ -75,8 +75,8 @@ local function OpenInventory(inv, data)
 	end
 
 	if CanOpenInventory() then
-		invBusy = true
 		local left, right
+
 		if inv == 'shop' and invOpen == false then
 			left, right = ServerCallback.Await(ox.resource, 'openShop', 200, data)
 		elseif invOpen ~= nil then
@@ -95,10 +95,9 @@ local function OpenInventory(inv, data)
 					data = input
 				end
 			end
+
 			left, right = ServerCallback.Await(ox.resource, 'openInventory', false, inv, data)
 		end
-
-		invBusy = false
 
 		if left then
 			if inv ~= 'trunk' and not IsPedInAnyVehicle(PlayerData.ped, false) then
