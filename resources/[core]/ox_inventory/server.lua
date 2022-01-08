@@ -209,6 +209,10 @@ ServerCallback.Register('swapItems', function(source, data)
 
 			if not sameInventory and toInventory.type == 'player' or toInventory.type == 'otherplayer' then
 				local fromData = fromInventory.items[data.fromSlot]
+				if not fromData then
+					TriggerClientEvent('ox_inventory:closeInventory', source, true)
+					return
+				end
 				local fromItem = Items(fromData.name)
 				local _, totalCount, _ = Inventory.GetItemSlots(toInventory, fromItem, fromItem.metadata)
 				if fromItem.limit and (totalCount + data.count) > fromItem.limit then
@@ -405,9 +409,8 @@ ServerCallback.Register('buyLicense', function(source, id)
 				return false, 'poor_weapon_license'
 			else
 				Inventory.RemoveItem(inventory, 'money', license.price)
-				TriggerEvent('esx_license:addLicense', source, 'weapon', function()
-					return 'bought_weapon_license'
-				end)
+				TriggerEvent('esx_license:addLicense', source, 'weapon')
+				return true, 'bought_weapon_license'
 			end
 		end
 	else

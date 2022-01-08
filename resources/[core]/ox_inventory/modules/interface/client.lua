@@ -66,13 +66,13 @@ end
 
 local function Complete(cancel)
 	if Interface.ProgressActive then
+		ResetPlayer()
 		if cancel and progress.canCancel then
 			progress.callback(true)
 			SendNUIMessage({ action = 'cancelProgress', })
 		elseif not cancel then
 			progress.callback(false)
 		end
-		ResetPlayer()
 	end
 end
 
@@ -84,11 +84,13 @@ function Interface.Progress(options, completed)
 		if not IsEntityDead(PlayerData.ped) or options.useWhileDead then
 			if options.disable then
 				local count = 0
-				for k in pairs(options.disable) do
-					local keys = progress[k]
-					for i=1, #keys do
-						count += 1
-						progress.disable[count] = keys[i]
+				for key, disable in pairs(options.disable) do
+					if disable then
+						local keys = progress[key]
+						for i=1, #keys do
+							count += 1
+							progress.disable[count] = keys[i]
+						end
 					end
 				end
 				if count > 0 then DisableControlActions:Add(progress.disable) end

@@ -24,6 +24,7 @@ local function CanOpenInventory()
 	return PlayerData.loaded
 	and not invBusy
 	and not PlayerData.dead
+	and not GetPedConfigFlag(PlayerData.ped, 120, true)
 	and (currentWeapon == nil or currentWeapon.timer == 0)
 	and not IsPauseMenuActive()
 	and not IsPedFatallyInjured(PlayerData.ped)
@@ -211,6 +212,7 @@ local function useSlot(slot)
 		if not item then return end
 		local data = item and Items[item.name]
 		if not data or not data.usable then return end
+		if data.name:find('at_') and not currentWeapon then Utils.Notify({type = 'error', text = ox.locale('weapon_hand_required')}) return end
 		data.slot = slot
 
 		if item.metadata.container then
@@ -314,6 +316,15 @@ local function useSlot(slot)
 				end
 			elseif item.name:find('at_') then
 				local components = data.client.component
+				local componentType = data.type
+				local weaponComponents = PlayerData.inventory[currentWeapon.slot].metadata.components
+				-- Checks if the weapon already has the same component type attached
+				for componentIndex = 1, #weaponComponents do
+					if componentType == Items[weaponComponents[componentIndex]].type then
+						-- todo: Update locale?
+						return Utils.Notify({type = 'error', text = ox.locale('component_has', data.label)})
+					end
+				end
 				for i=1, #components do
 					local component = components[i]
 
@@ -343,6 +354,7 @@ exports('useSlot', useSlot)
 local function CanOpenTarget(ped)
 	return IsPedFatallyInjured(ped)
 	or IsEntityPlayingAnim(ped, 'dead', 'dead_a', 3)
+	or GetPedConfigFlag(ped, 120, true)
 	or IsEntityPlayingAnim(ped, 'mp_arresting', 'idle', 3)
 	or IsEntityPlayingAnim(ped, 'missminuteman_1ig_2', 'handsup_base', 3)
 	or IsEntityPlayingAnim(ped, 'missminuteman_1ig_2', 'handsup_enter', 3)
@@ -800,7 +812,7 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 						if success == false then
 							Utils.Notify({type = 'error', text = ox.locale(message), duration = 2500})
 						else
-							Utils.Notify({text = ox.locale(success), duration = 2500})
+							Utils.Notify({text = ox.locale(message), duration = 2500})
 						end
 					end, closestMarker[2])
 				elseif closestMarker[3] == 'shop' then OpenInventory(closestMarker[3], {id=closestMarker[2], type=closestMarker[4]})
@@ -1012,7 +1024,7 @@ RegisterNUICallback('swapItems', function(data, cb)
 		currentWeapon.slot = weapon
 		TriggerEvent('ox_inventory:currentWeapon', currentWeapon)
 	end
-	cb(response)
+	cb(response or false)
 end)
 
 RegisterNUICallback('buyItem', function(data, cb)

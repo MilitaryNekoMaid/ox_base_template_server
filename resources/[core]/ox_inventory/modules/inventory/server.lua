@@ -510,7 +510,7 @@ function Inventory.GetItemSlots(inv, item, metadata)
 			if metadata and v.metadata == nil then
 				v.metadata = {}
 			end
-			if not metadata or table.matches(v.metadata, metadata) then
+			if not metadata or item.limit or table.matches(v.metadata, metadata) then
 				totalCount = totalCount + v.count
 				slots[k] = v.count
 			end
@@ -661,7 +661,7 @@ function Inventory.CreateDrop(source, slot, toSlot, cb)
 end
 AddEventHandler('ox_inventory:createDrop', CreateDrop)
 
-local function customDrop(prefix, items, coords, slots, maxWeight)
+local function CustomDrop(prefix, items, coords, slots, maxWeight)
 	local drop = generateDropId()
 	local items, weight = generateItems(drop, 'drop', items)
 	local inventory = Inventory.Create(drop, prefix..' '..drop, 'drop', slots or ox.playerslots, weight, maxWeight or ox.playerweight, false, items)
@@ -669,7 +669,7 @@ local function customDrop(prefix, items, coords, slots, maxWeight)
 	Inventory.Drops[drop] = inventory.coords
 	TriggerClientEvent('ox_inventory:createDrop', -1, {drop, coords}, inventory.open and source)
 end
-AddEventHandler('ox_inventory:customDrop', customDrop)
+AddEventHandler('ox_inventory:customDrop', CustomDrop)
 exports('CustomDrop', CustomDrop)
 
 function Inventory.Confiscate(source)
@@ -891,7 +891,7 @@ RegisterServerEvent('ox_inventory:updateWeapon', function(action, value, slot)
 					weapon.metadata.durability = math.floor(value)
 					weapon.metadata.ammo = weapon.metadata.durability
 				elseif value < weapon.metadata.ammo then
-					local durability = math.ceil(Items(weapon.name).durability * math.abs((weapon.metadata.ammo or 0.1) - value))
+					local durability = Items(weapon.name).durability * math.abs((weapon.metadata.ammo or 0.1) - value)
 					weapon.metadata.ammo = value
 					weapon.metadata.durability = weapon.metadata.durability - durability
 				end
