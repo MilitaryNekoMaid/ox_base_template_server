@@ -1,4 +1,5 @@
 local playersHealing, deadPlayers = {}, {}
+local ox_inventory = exports.ox_inventory
 
 TriggerEvent('esx_phone:registerNumber', 'ambulance', _U('alert_ambulance'), true, true)
 
@@ -100,43 +101,18 @@ end)
 ESX.RegisterServerCallback('esx_ambulancejob:removeItemsAfterRPDeath', function(source, cb)
 	local xPlayer = ESX.GetPlayerFromId(source)
 
-	if Config.RemoveCashAfterRPDeath then
-		if xPlayer.getMoney() > 0 then
-			xPlayer.removeMoney(xPlayer.getMoney())
-		end
-
-		if xPlayer.getAccount('black_money').money > 0 then
-			xPlayer.setAccountMoney('black_money', 0)
-		end
-	end
-
 	if Config.RemoveItemsAfterRPDeath then
-		for i=1, #xPlayer.inventory, 1 do
-			if xPlayer.inventory[i].count > 0 then
-				xPlayer.setInventoryItem(xPlayer.inventory[i].name, 0)
-			end
-		end
-	end
-
-	local playerLoadout = {}
-	if Config.RemoveWeaponsAfterRPDeath then
-		for i=1, #xPlayer.loadout, 1 do
-			xPlayer.removeWeapon(xPlayer.loadout[i].name)
-		end
-	else -- save weapons & restore em' since spawnmanager removes them
-		for i=1, #xPlayer.loadout, 1 do
-			table.insert(playerLoadout, xPlayer.loadout[i])
-		end
-
-		-- give back wepaons after a couple of seconds
-		Citizen.CreateThread(function()
-			Citizen.Wait(5000)
-			for i=1, #playerLoadout, 1 do
-				if playerLoadout[i].label ~= nil then
-					xPlayer.addWeapon(playerLoadout[i].name, playerLoadout[i].ammo)
+		if next(xPlayer.inventory) then
+			if Config.CreateDropOfRemovedItems then
+				local inventory = {}
+				for k, v in pairs(xPlayer.inventory) do
+					inventory[#inventory + 1] = {v.name, v.count, v.metadata}
 				end
+				local coords = vec(xPlayer.coords.x, xPlayer.coords.y, xPlayer.coords.z + 1)
+				ox_inventory:CustomDrop(("%s %s's Dropped Items"):format(xPlayer.variables.firstName, xPlayer.variables.lastName), inventory, coords)
 			end
-		end)
+			ox_inventory:ClearInventory(source)
+		end
 	end
 
 	cb()
@@ -160,13 +136,6 @@ if Config.EarlyRespawnFine then
 	end)
 end
 
-ESX.RegisterServerCallback('esx_ambulancejob:getItemAmount', function(source, cb, item)
-	local xPlayer = ESX.GetPlayerFromId(source)
-	local quantity = xPlayer.getInventoryItem(item).count
-
-	cb(quantity)
-end)
-
 ESX.RegisterServerCallback('esx_ambulancejob:buyJobVehicle', function(source, cb, vehicleProps, type)
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local price = getPriceFromHash(vehicleProps.model, xPlayer.job.grade_name, type)
@@ -178,14 +147,8 @@ ESX.RegisterServerCallback('esx_ambulancejob:buyJobVehicle', function(source, cb
 		if xPlayer.getMoney() >= price then
 			xPlayer.removeMoney(price)
 
-			MySQL.Async.execute('INSERT INTO owned_vehicles (owner, vehicle, plate, type, job, `stored`) VALUES (@owner, @vehicle, @plate, @type, @job, @stored)', {
-				['@owner'] = xPlayer.identifier,
-				['@vehicle'] = json.encode(vehicleProps),
-				['@plate'] = vehicleProps.plate,
-				['@type'] = type,
-				['@job'] = xPlayer.job.name,
-				['@stored'] = true
-			}, function (rowsChanged)
+			MySQL.insert('INSERT INTO owned_vehicles (owner, vehicle, plate, type, job, `stored`) VALUES (?, ?, ?, ?, ?, ?)', {xPlayer.identifier, json.encode(vehicleProps), vehicleProps.plate, type, xPlayer.job.name, true},
+			function (rowsChanged)
 				cb(true)
 			end)
 		else
@@ -194,46 +157,32 @@ ESX.RegisterServerCallback('esx_ambulancejob:buyJobVehicle', function(source, cb
 	end
 end)
 
-ESX.RegisterServerCallback('esx_ambulancejob:storeNearbyVehicle', function(source, cb, nearbyVehicles)
+ESX.RegisterServerCallback('esx_ambulancejob:storeNearbyVehicle', function(source, cb, plates)
 	local xPlayer = ESX.GetPlayerFromId(source)
-	local foundPlate, foundNum
 
-	for k,v in ipairs(nearbyVehicles) do
-		local result = MySQL.Sync.fetchAll('SELECT plate FROM owned_vehicles WHERE owner = @owner AND plate = @plate AND job = @job', {
-			['@owner'] = xPlayer.identifier,
-			['@plate'] = v.plate,
-			['@job'] = xPlayer.job.name
-		})
+	local plate = MySQL.single.await('SELECT plate FROM owned_vehicles WHERE owner = ? AND plate IN (?) AND job = ?', {xPlayer.identifier, plates, xPlayer.job.name})
 
-		if result[1] then
-			foundPlate, foundNum = result[1].plate, k
-			break
-		end
-	end
-
-	if not foundPlate then
-		cb(false)
-	else
-		MySQL.Async.execute('UPDATE owned_vehicles SET `stored` = true WHERE owner = @owner AND plate = @plate AND job = @job', {
-			['@owner'] = xPlayer.identifier,
-			['@plate'] = foundPlate,
-			['@job'] = xPlayer.job.name
-		}, function (rowsChanged)
+	if plate then
+		MySQL.update('UPDATE owned_vehicles SET `stored` = true WHERE owner = ? AND plate = ? AND job = ?', {xPlayer.identifier, plate, xPlayer.job.name},
+		function(rowsChanged)
 			if rowsChanged == 0 then
 				cb(false)
 			else
-				cb(true, foundNum)
+				cb(plate)
 			end
 		end)
+	else
+		cb(false)
 	end
 end)
 
 function getPriceFromHash(vehicleHash, jobGrade, type)
 	local vehicles = Config.AuthorizedVehicles[type][jobGrade]
 
-	for k,v in ipairs(vehicles) do
-		if GetHashKey(v.model) == vehicleHash then
-			return v.price
+	for i = 1, #vehicles do
+		local vehicle = vehicles[i]
+		if GetHashKey(vehicles.model) == vehicleHash then
+			return vehicle.price
 		end
 	end
 
@@ -241,33 +190,15 @@ function getPriceFromHash(vehicleHash, jobGrade, type)
 end
 
 RegisterNetEvent('esx_ambulancejob:removeItem')
-AddEventHandler('esx_ambulancejob:removeItem', function(item)
-	local xPlayer = ESX.GetPlayerFromId(source)
-	xPlayer.removeInventoryItem(item, 1)
-
-	if item == 'bandage' then
-		xPlayer.showNotification(_U('used_bandage'))
-	elseif item == 'medikit' then
-		xPlayer.showNotification(_U('used_medikit'))
-	end
-end)
-
-RegisterNetEvent('esx_ambulancejob:giveItem')
-AddEventHandler('esx_ambulancejob:giveItem', function(itemName, amount)
-	local xPlayer = ESX.GetPlayerFromId(source)
-
-	if xPlayer.job.name ~= 'ambulance' then
-		print(('[esx_ambulancejob] [^2INFO^7] "%s" attempted to spawn in an item!'):format(xPlayer.identifier))
-		return
-	elseif (itemName ~= 'medikit' and itemName ~= 'bandage') then
-		print(('[esx_ambulancejob] [^2INFO^7] "%s" attempted to spawn in an item!'):format(xPlayer.identifier))
-		return
-	end
-
-	if xPlayer.canCarryItem(itemName, amount) then
-		xPlayer.addInventoryItem(itemName, amount)
-	else
-		xPlayer.showNotification(_U('max_item'))
+AddEventHandler('esx_ambulancejob:removeItem', function(itemName)
+	local item = ox_inventory:GetItem(source, itemName)
+	if item.count > 0 then
+		ox_inventory:RemoveItem(source, itemName, 1)
+		if itemName == 'bandage' then
+			xPlayer.showNotification(_U('used_bandage'))
+		elseif itemName == 'medikit' then
+			xPlayer.showNotification(_U('used_medikit'))
+		end
 	end
 end)
 
@@ -306,9 +237,8 @@ end)
 ESX.RegisterServerCallback('esx_ambulancejob:getDeathStatus', function(source, cb)
 	local xPlayer = ESX.GetPlayerFromId(source)
 
-	MySQL.Async.fetchScalar('SELECT is_dead FROM users WHERE identifier = @identifier', {
-		['@identifier'] = xPlayer.identifier
-	}, function(isDead)
+	MySQL.scalar.await('SELECT is_dead FROM users WHERE identifier = ?', {xPlayer.identifier},
+	function(isDead)
 				
 		if isDead then
 			print(('[esx_ambulancejob] [^2INFO^7] "%s" attempted combat logging'):format(xPlayer.identifier))
@@ -323,9 +253,6 @@ AddEventHandler('esx_ambulancejob:setDeathStatus', function(isDead)
 	local xPlayer = ESX.GetPlayerFromId(source)
 
 	if type(isDead) == 'boolean' then
-		MySQL.Sync.execute('UPDATE users SET is_dead = @isDead WHERE identifier = @identifier', {
-			['@identifier'] = xPlayer.identifier,
-			['@isDead'] = isDead
-		})
+		MySQL.update('UPDATE users SET is_dead = ? WHERE identifier = ?', {isDead, xPlayer.identifier})
 	end
 end)
