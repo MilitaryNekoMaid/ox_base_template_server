@@ -173,11 +173,13 @@ local function useItem(data, cb)
 					prop = data.prop,
 					propTwo = data.propTwo
 				}, function(cancel)
-					p:resolve(cancel and false or true)
+					p:resolve(cancel)
 				end)
 			end
 
-			if not p or Citizen.Await(p) then
+			if p then Citizen.Await(p) end
+
+			if not p or not p.value then
 				if result.consume and result.consume ~= 0 then
 					TriggerServerEvent('ox_inventory:removeItem', result.name, result.consume, result.metadata, result.slot, true)
 				end
@@ -227,6 +229,7 @@ local function useSlot(slot)
 
 				return data.client.export(0, data, {name = item.name, slot = item.slot, metadata = item.metadata})
 			elseif data.client.event then -- deprecated, to be removed
+				print('data.client.event is deprecated, utilise exports instead.')
 				return TriggerEvent(data.client.event, data, {name = item.name, slot = item.slot, metadata = item.metadata})
 			end
 		end
@@ -301,6 +304,7 @@ local function useSlot(slot)
 
 						if data then
 							if data.name == currentWeapon.ammo then
+								DisableControlActions:Add(22)
 								local missingAmmo = 0
 								local newAmmo = 0
 								missingAmmo = maxAmmo - currentAmmo
@@ -310,6 +314,8 @@ local function useSlot(slot)
 								MakePedReload(playerPed)
 								currentWeapon.metadata.ammo = newAmmo
 								TriggerServerEvent('ox_inventory:updateWeapon', 'load', currentWeapon.metadata.ammo)
+								Wait(1500)
+								DisableControlActions:Remove(22)
 							end
 						end
 					end)
@@ -462,11 +468,11 @@ local function RegisterCommands()
 							local netId = NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity)
 
 							if not netId then
-								SetEntityAsMissionEntity(entity)
 								NetworkRegisterEntityAsNetworked(entity)
+								SetEntityAsMissionEntity(entity)
 								netId = NetworkGetNetworkIdFromEntity(entity)
 								NetworkUseHighPrecisionBlending(netId, false)
-								SetNetworkIdExistsOnAllMachines(netId)
+								SetNetworkIdExistsOnAllMachines(netId, true)
 								SetNetworkIdCanMigrate(netId, true)
 							end
 
