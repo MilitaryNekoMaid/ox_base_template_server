@@ -308,6 +308,7 @@ if ESX.GetConfig().Multichar then
 		TriggerServerEvent('esx:onPlayerSpawn')
 		TriggerEvent('esx:onPlayerSpawn')
 		TriggerEvent('playerSpawned')
+		exports['ev-hud']:StartHud()
 		TriggerEvent('esx:restoreLoadout')
 		Characters, hidePlayers = {}, false
 	end)

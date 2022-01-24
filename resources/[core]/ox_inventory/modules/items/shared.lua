@@ -13,7 +13,10 @@ function items()
 			end
 		end
 
-		if IsDuplicityVersion then v.client = nil else v.server = nil end
+		if IsDuplicityVersion then v.client = nil else
+			v.server = nil
+			v.count = 0
+		end
 		ItemList[k] = v
 	end
 
@@ -23,13 +26,17 @@ function items()
 			v.close = type == 'Ammo' and true or false
 			if type == 'Weapons' then
 				v.hash = joaat(k)
-				v.stack = false
+				v.stack = v.throwable and true or false
 				v.durability = v.durability or 1
 			else
 				v.stack = true
 			end
 
-			if IsDuplicityVersion then v.client = nil else v.server = nil end
+			if IsDuplicityVersion then v.client = nil else
+				v.count = 0
+				v.server = nil
+			end
+
 			ItemList[k] = v
 		end
 	end

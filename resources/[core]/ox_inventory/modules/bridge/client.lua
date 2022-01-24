@@ -13,28 +13,29 @@ PlayerData = {
     loaded = false
 }
 
-function ox.SetPlayerData(key, value)
+function client.setPlayerData(key, value)
     PlayerData[key] = value
     OnPlayerData(key, value)
 end
 
+function client.isPolice()
+    return shared.police[PlayerData.job.name] ~= nil
+end
+
 local Utils = client.utils
 
-if ox.esx then
-    local ESX = exports['es_extended']:getSharedObject()
+if shared.framework == 'esx' then
+    local ESX = exports.es_extended:getSharedObject()
 
     PlayerData.dead = PlayerData.dead
-    PlayerData.inventory = PlayerData.inventory
-    PlayerData.weight = PlayerData.weight
-    PlayerData.ped = PlayerData.ped
     PlayerData.job = PlayerData.job
-    PlayerData.loaded = ESX.PlayerLoaded
 
     ESX = {
         SetPlayerData = ESX.SetPlayerData,
+		PlayerLoaded = ESX.PlayerLoaded
     }
 
-    function ox.SetPlayerData(key, value)
+    function client.setPlayerData(key, value)
         PlayerData[key] = value
         ESX.SetPlayerData(key, value)
     end
@@ -59,4 +60,9 @@ if ox.esx then
         PlayerData.cuffed = false
         LocalPlayer.state:set('busy', PlayerData.cuffed, false)
     end)
+
+	if ESX.PlayerLoaded then
+		TriggerServerEvent('ox_inventory:requestPlayerInventory')
+	end
+
 end

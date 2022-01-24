@@ -76,38 +76,9 @@ return {
 		close = false,
 		consume = 0
 	},
-	
+
 	['identification'] = {
 		label = 'Identification',
-		weight = 0,
-		stack = false,
-		close = true,
-		client = {
-			consume = 0,
-			event = "qidentification:identification",
-		}
-	},
-
-	['drivers_license'] = {
-		label = 'Drivers License',
-		weight = 0,
-		stack = false,
-		close = true,
-		client = {
-			consume = 0,
-			event = "qidentification:drivers_license",
-		}
-	},
-
-	['firearms_license'] = {
-		label = 'Firearms License',
-		weight = 0,
-		stack = false,
-		close = true,
-		client = {
-			consume = 0,
-			event = "qidentification:firearms_license",
-		}
 	},
 
 	['panties'] = {
@@ -139,6 +110,19 @@ return {
 		weight = 190,
 		stack = false,
 		consume = 0,
+		client = {
+			add = function(total)
+				if total > 0 and GetResourceState('npwd') == 'started' then
+					exports.npwd:setPhoneDisabled(false)
+				end
+			end,
+
+			remove = function(total)
+				if total < 1 and GetResourceState('npwd') == 'started' then
+					exports.npwd:setPhoneDisabled(true)
+				end
+			end
+		}
 	},
 
 	['money'] = {

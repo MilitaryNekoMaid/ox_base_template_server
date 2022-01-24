@@ -3,21 +3,22 @@ const selection = doc.getElementById('selection')
 // Load draggable
 window.addEventListener('load', () => {
   frameworkStartUp();
+  startDraggable();
+  startColors();
+  startPositions();
+  startSliders();
+  startColorpicker();
 });
 
 // Switches & Cases
 this.addEventListener("message", function(event) {
   switch (event.data.action) {
-    case "startUp":
-      startDraggable();
-      startColors();
-      startPositions();
-      startSliders();
-      startColorpicker();
-    break;
-
     case "show":
       startPhone();
+    break;
+
+    case "startHud":
+      $('.main').show()
     break;
 
     // Send Data
@@ -204,35 +205,35 @@ window.addEventListener('load', ()=> {
       case "health-option":
         colorPicker.value = rgb2hex($('#health-circle').css('stroke'))
       break;
-  
+
       case "armor-option":
         colorPicker.value = rgb2hex($('#armor-circle').css('stroke'))
       break;
-  
+
       case "stamina-option":
         colorPicker.value = rgb2hex($('#stamina-circle').css('stroke'))
       break;
-  
+
       case "hunger-option":
         colorPicker.value = rgb2hex($('#hunger-circle').css('stroke'))
       break;
-  
+
       case "thirst-option":
         colorPicker.value = rgb2hex($('#thirst-circle').css('stroke'))
       break;
-  
+
       case "stress-option":
         colorPicker.value = rgb2hex($('#stress-circle').css('stroke'))
       break;
-  
+
       case "oxygen-option":
         colorPicker.value = rgb2hex($('#oxygen-circle').css('stroke'))
       break;
-  
+
       case "microphone-option":
         colorPicker.value = rgb2hex($('#microphone-circle').css('stroke'))
       break;
-  
+
       case "id-option":
         colorPicker.value = rgb2hex($('#id-circle').css('stroke'))
       break;
