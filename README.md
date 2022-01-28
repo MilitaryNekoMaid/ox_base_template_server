@@ -29,6 +29,7 @@ With that being said, right out the gate everything will be working/usable but o
 
 ## IMPORTANT
 Make sure to replace the "replaceme" text in server.cfg with your info.
+
 To use photos for NPWS you need to follow the install guide here - https://projecterror.dev/docs/npwd/start/installation#setting-up-camera-functionality 
 
 You can also just run FXServer.exe and during setup choose like CFX Default template and after setup
