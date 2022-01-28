@@ -77,9 +77,38 @@ return {
 		consume = 0
 	},
 
-	['identification'] = {
-		label = 'Identification',
-	},
+	['drivers_license'] = {
+        label = 'Drivers License',
+        weight = 50,
+        stack = false,
+        close = true,
+        consume = 0,
+        client = {
+            export = "qidentification.Showdrivers_license"
+        }
+    },
+
+    ['identification'] = {
+        label = 'ID Card',
+        weight = 50,
+        stack = false,
+        close = true,
+        consume = 0,
+        client = {
+            export = "qidentification.Showidentification"
+        }
+    },
+
+	['firearms_license'] = {
+	label = 'Firearms License',
+        weight = 50,
+        stack = false,
+        close = true,
+        consume = 0,
+        client = {
+            export = "qidentification.Showfirearms_license"
+        }
+    },
 
 	['panties'] = {
 		label = 'Knickers',
