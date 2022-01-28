@@ -30,6 +30,8 @@ With that being said, right out the gate everything will be working/usable but o
 ## IMPORTANT
 Make sure to replace the "replaceme" text in server.cfg with your info.
 
+To use photos for NPWS you need to follow the install guide here - https://projecterror.dev/docs/npwd/start/installation#setting-up-camera-functionality 
+
 You can also just run FXServer.exe and during setup choose like CFX Default template and after setup
 just delete resources created from setup and replace with the resources folder provided.
 
@@ -40,6 +42,6 @@ CREATE DATABASE IF NOT EXISTS `oxtemplate` /*!40100 DEFAULT CHARACTER SET utf8mb
 USE `oxtemplate`;
 
 ## SUPPORT
-I will not be providing support for this. I will try and keep it updated when I can but if you struggle using this then you will struggle with more and you will need to figure out things for yourself. Don't be lazy, google, check cfx forums, ask in discords, etc...
+We will not be providing direct support for this. We will keep it updated when we can but if you struggle using this then you will struggle with more and you will need to figure out things for yourself. Don't be lazy, google, check cfx forums, ask in discords, etc...
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P5P57KRR9)
