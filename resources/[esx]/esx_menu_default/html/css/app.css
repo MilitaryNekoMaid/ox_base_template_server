@@ -1,73 +1,63 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Poppins|Roboto+Condensed');
 
-::-webkit-scrollbar {
-  display: none;
-}
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@700&family=Roboto:wght@300;400;500;700;900&display=swap');
 
 .menu {
-	font-family: 'Poppins', sans-serif;
-	min-width: 250px;
+	font-family: Segoe UI;
+	font-weight: 500;
+	text-transform:uppercase;
+	min-width: 330px;
 	color: #fff;
 	position: absolute;
-  text-align: center;
-  margin-top: 400px;
+	padding: 8px;
+	margin-top: 400px;
 }
 
 .head {
-  display: block;
-  text-align: center;
-  overflow: hidden;
-  white-space: nowrap;
+	display: block;
+	text-align: center;
+	overflow: hidden;
+	white-space: nowrap;
+	letter-spacing: 4px;
 }
 
 .menu .head {
-  margin: auto;
+	background-color: #000000;
+	font-family: 'Inter', sans-serif;
+	border-radius: 7px;
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, .2);
+	box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
 	text-align: center;
-	height: 35px;
-	color: #fff;
-  font-weight: 200;
-  font-size: 16px;
-  text-shadow: 1px 1px black;
-  background: rgba(0, 0, 0, 0.8);
-  padding-top: 7px;
-  border-radius: 10px;
+	color: #ecf0f1;
+	font-weight: 700;
+	line-height: 60px;
+	font-size: 1.15em;
 }
 
 .menu .menu-items {
-	max-height: 350px;
+	max-height: 524px;
 	overflow-y: auto;
-  font-weight: 400;  
-}
-
-.menu-items {
-  margin-bottom: 8px;
+	font-weight: 500;
+	top: 40%;
+	margin-top: 40px;
 }
 
 .menu .menu-items .menu-item {
-	margin: auto;
-	width: 250px;
 	display: block;
-  padding: 10px;
-  font-size: 12px;
-  height: 14px;
-  text-indent: 5px;
-  margin-top: 5px;
-  color: rgba(202, 202, 202, 0.8);
-  text-shadow: 1px 1px black;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 10px;
+	padding: 14px;
+	font-size: 13px;
+	text-align: left;
+	text-indent: 1px;
+	margin-top: 7px;
+	background: #070707;
+	color: #ffffff;
+	border-radius: 7px;
 }
 
 .menu .menu-items .menu-item.selected {
-	width: 250px;
-  color: #fff;
-  letter-spacing: 0.2px;
-  font-weight: 600;
-  margin-top: 2px;
-  font-size: 13px;
-  text-shadow: 1px 1px black;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 10px;
+	background: #0984e3; 
+	border: 1.5px solid #000;
+	color: white; 
 }
 
 .menu.align-left {
@@ -83,46 +73,57 @@
 
 .menu.align-top {
 	left: 50%;
-	top: 0;
-  border-bottom: 6px solid;
+	top: 100;
 	transform: translate(-50%, 0);
 }
 
 .menu.align-top-right {
 	right: 10;
-	top: 0;
-  border-bottom: 6px solid;
+	top: 40;
 }
 
 .menu.align-right {
-	right: 0;
+	right: 40;
 	top: 50%;
-  border-left: 6px solid;
 	transform: translate(0, -50%);
 }
 
 .menu.align-bottom-right {
 	right: 40;
-	bottom: 0;
-  border-top: 6px solid;
+	bottom: 40;
 }
 
 .menu.align-bottom {
 	left: 50%;
-	bottom: 0;
-  border-top: 6px solid;
+	bottom: 40;
 	transform: translate(-50%, 0);
 }
 
 .menu.align-bottom-left {
 	left: 40;
-	bottom: 0;
-  border-top: 6px solid;
+	bottom: 40;
 }
 
 .menu.align-center {
 	left: 50%;
 	top: 50%;
 	transform: translate(-50%, -50%);
-  border-top: 6px solid;
+}
+
+/* WebKit scrollbar properties */
+::-webkit-scrollbar {
+	width: 8px;
+	border-left: 4px solid #00000000;
+}
+::-webkit-scrollbar-track {
+	background: #00000000;
+	border-left: 4px solid #00000000;
+}
+::-webkit-scrollbar-thumb {
+	background: #00000000;
+	border-left: 4px solid #00000000;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: #00000000;
+	border-left: 4px solid #00000000;
 }

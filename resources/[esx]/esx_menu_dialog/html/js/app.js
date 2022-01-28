@@ -1,11 +1,11 @@
 (function () {
 	let MenuTpl =
 		'<div id="menu_{{_namespace}}_{{_name}}" class="dialog {{#isBig}}big{{/isBig}}">' +
-			'<div class="head"><span>{{title}}</span></div>' +
+			'<div class="title"><span>{{title}}</span></div>' +
 				'{{#isDefault}}<input type="text" name="value" id="inputText"/>{{/isDefault}}' +
 				'{{#isBig}}<textarea name="value"/>{{/isBig}}' +
 				'<button type="button" name="submit">Submit</button>' +
-				'<button type="button" name="cancel">Cancel</button>' +
+				// '<button type="button" name="cancel">Cancel</button>' +
 			'</div>' +
 		'</div>'
 	;
@@ -76,7 +76,7 @@
 	ESX_MENU.render = function () {
 		let menuContainer = $('#menus')[0];
 		$(menuContainer).find('button[name="submit"]').unbind('click');
-		$(menuContainer).find('button[name="cancel"]').unbind('click');
+		// $(menuContainer).find('button[name="cancel"]').unbind('click');
 		$(menuContainer).find('[name="value"]').unbind('input propertychange');
 		menuContainer.innerHTML = '';
 		$(menuContainer).hide();
@@ -109,9 +109,9 @@
 					ESX_MENU.submit(this.namespace, this.name, this.data);
 				}.bind({ namespace: namespace, name: name, data: menuData }));
 
-				$(menu).find('button[name="cancel"]').click(function () {
-					ESX_MENU.cancel(this.namespace, this.name, this.data);
-				}.bind({ namespace: namespace, name: name, data: menuData }));
+				// $(menu).find('button[name="cancel"]').click(function () {
+				// 	ESX_MENU.cancel(this.namespace, this.name, this.data);
+				// }.bind({ namespace: namespace, name: name, data: menuData }));
 
 				$(menu).find('[name="value"]').bind('input propertychange', function () {
 					this.data.value = $(menu).find('[name="value"]').val();
@@ -135,7 +135,7 @@
 	};
 
 	ESX_MENU.cancel = function (namespace, name, data) {
-		SendMessage(ESX_MENU.ResourceName, 'menu_cancel', data);
+		$.post('http://' + ESX_MENU.ResourceName + '/menu_cancel', JSON.stringify(data));
 	};
 
 	ESX_MENU.change = function (namespace, name, data) {

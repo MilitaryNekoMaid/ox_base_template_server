@@ -22,7 +22,10 @@ files {
 	'html/js/app.js',
 
 	'html/fonts/pdown.ttf',
-	'html/fonts/bankgothic.ttf'
+	'html/fonts/bankgothic.ttf',
+	'html/img/cursor.png',
+	'html/img/keys/enter.png',
+	'html/img/keys/return.png',
 }
 
 dependency 'es_extended'
