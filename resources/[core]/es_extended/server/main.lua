@@ -199,7 +199,7 @@ function loadESXPlayer(identifier, playerId, isNew)
 		Player.admin = Core.IsPlayerAdmin(playerId)
 
 		-- Create xPlayer object
-		local xPlayer = CreateExtendedPlayer(playerId, identifier, userData.group, userData.accounts, userData.job, userData.playerName, userData.coords)
+		local xPlayer = CreateExtendedPlayer(playerId, identifier, userData.group, userData.accounts, userData.job, userData.playerName, userData.coords, userData.inventory)
 		ESX.Players[playerId] = xPlayer
 
 		if userData.firstname then
@@ -232,7 +232,7 @@ function loadESXPlayer(identifier, playerId, isNew)
 	end)
 end
 
-local Logout = function(playerId)
+local Logout = function(playerId, reason)
 	local xPlayer = ESX.GetPlayerFromId(playerId)
 	if xPlayer then
 		TriggerEvent('esx:playerDropped', playerId, reason)
@@ -247,7 +247,7 @@ local Logout = function(playerId)
 end
 
 AddEventHandler('playerDropped', function(reason)
-	Logout(source)
+	Logout(source, reason)
 end)
 
 if Config.Multichar then
