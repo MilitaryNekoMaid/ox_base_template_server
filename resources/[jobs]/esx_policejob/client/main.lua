@@ -203,16 +203,20 @@ function OpenCloakroomMenu()
 	end)
 end
 
+local ox_inventory = exports.ox_inventory
+
 function OpenArmoryMenu(station)
-	local elements = {
-		{label = _U('buy_weapons'), value = 'buy_weapons'}
-	}
+	local elements = {}
 
 	if Config.EnableArmoryManagement then
-		table.insert(elements, {label = _U('get_weapon'),     value = 'get_weapon'})
-		table.insert(elements, {label = _U('put_weapon'),     value = 'put_weapon'})
-		table.insert(elements, {label = _U('remove_object'),  value = 'get_stock'})
-		table.insert(elements, {label = _U('deposit_object'), value = 'put_stock'})
+		elements ={
+			{label = _U('remove_object'),  value = 'get_stock'},
+			{label = _U('deposit_object'), value = 'put_stock'}
+		}
+	else
+		elements = {
+			{label = 'None'}
+		}
 	end
 
 	ESX.UI.Menu.CloseAll()
@@ -222,17 +226,10 @@ function OpenArmoryMenu(station)
 		align    = 'top-left',
 		elements = elements
 	}, function(data, menu)
-
-		if data.current.value == 'get_weapon' then
-			OpenGetWeaponMenu()
-		elseif data.current.value == 'put_weapon' then
-			OpenPutWeaponMenu()
-		elseif data.current.value == 'buy_weapons' then
-			OpenBuyWeaponsMenu()
-		elseif data.current.value == 'put_stock' then
-			OpenPutStocksMenu()
+		if data.current.value == 'put_stock' then
+			ox_inventory:openInventory('policeevidence')
 		elseif data.current.value == 'get_stock' then
-			OpenGetStocksMenu()
+			ox_inventory:openInventory('stash', 'society_police')
 		end
 
 	end, function(data, menu)
@@ -283,7 +280,7 @@ function OpenPoliceActionsMenu()
 					if action == 'identity_card' then
 						OpenIdentityCardMenu(closestPlayer)
 					elseif action == 'search' then
-						OpenBodySearchMenu(closestPlayer)
+						TriggerEvent('ox_inventory:openInventory', 'player', GetPlayerServerId(closestPlayer))
 					elseif action == 'handcuff' then
 						TriggerServerEvent('esx_policejob:handcuff', GetPlayerServerId(closestPlayer))
 					elseif action == 'drag' then
@@ -440,62 +437,6 @@ function OpenIdentityCardMenu(player)
 			align    = 'top-left',
 			elements = elements
 		}, nil, function(data, menu)
-			menu.close()
-		end)
-	end, GetPlayerServerId(player))
-end
-
-function OpenBodySearchMenu(player)
-	ESX.TriggerServerCallback('esx_policejob:getOtherPlayerData', function(data)
-		local elements = {}
-
-		for i=1, #data.accounts, 1 do
-			if data.accounts[i].name == 'black_money' and data.accounts[i].money > 0 then
-				table.insert(elements, {
-					label    = _U('confiscate_dirty', ESX.Math.Round(data.accounts[i].money)),
-					value    = 'black_money',
-					itemType = 'item_account',
-					amount   = data.accounts[i].money
-				})
-
-				break
-			end
-		end
-
-		table.insert(elements, {label = _U('guns_label')})
-
-		for i=1, #data.weapons, 1 do
-			table.insert(elements, {
-				label    = _U('confiscate_weapon', ESX.GetWeaponLabel(data.weapons[i].name), data.weapons[i].ammo),
-				value    = data.weapons[i].name,
-				itemType = 'item_weapon',
-				amount   = data.weapons[i].ammo
-			})
-		end
-
-		table.insert(elements, {label = _U('inventory_label')})
-
-		for i=1, #data.inventory, 1 do
-			if data.inventory[i].count > 0 then
-				table.insert(elements, {
-					label    = _U('confiscate_inv', data.inventory[i].count, data.inventory[i].label),
-					value    = data.inventory[i].name,
-					itemType = 'item_standard',
-					amount   = data.inventory[i].count
-				})
-			end
-		end
-
-		ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'body_search', {
-			title    = _U('search'),
-			align    = 'top-left',
-			elements = elements
-		}, function(data, menu)
-			if data.current.value then
-				TriggerServerEvent('esx_policejob:confiscatePlayerItem', GetPlayerServerId(player), data.current.itemType, data.current.value, data.current.amount)
-				OpenBodySearchMenu(player)
-			end
-		end, function(data, menu)
 			menu.close()
 		end)
 	end, GetPlayerServerId(player))
@@ -659,271 +600,6 @@ function OpenVehicleInfosMenu(vehicleData)
 			menu.close()
 		end)
 	end, vehicleData.plate)
-end
-
-function OpenGetWeaponMenu()
-	ESX.TriggerServerCallback('esx_policejob:getArmoryWeapons', function(weapons)
-		local elements = {}
-
-		for i=1, #weapons, 1 do
-			if weapons[i].count > 0 then
-				table.insert(elements, {
-					label = 'x' .. weapons[i].count .. ' ' .. ESX.GetWeaponLabel(weapons[i].name),
-					value = weapons[i].name
-				})
-			end
-		end
-
-		ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'armory_get_weapon', {
-			title    = _U('get_weapon_menu'),
-			align    = 'top-left',
-			elements = elements
-		}, function(data, menu)
-			menu.close()
-
-			ESX.TriggerServerCallback('esx_policejob:removeArmoryWeapon', function()
-				OpenGetWeaponMenu()
-			end, data.current.value)
-		end, function(data, menu)
-			menu.close()
-		end)
-	end)
-end
-
-function OpenPutWeaponMenu()
-	local elements   = {}
-	local playerPed  = PlayerPedId()
-	local weaponList = ESX.GetWeaponList()
-
-	for i=1, #weaponList, 1 do
-		local weaponHash = GetHashKey(weaponList[i].name)
-
-		if HasPedGotWeapon(playerPed, weaponHash, false) and weaponList[i].name ~= 'WEAPON_UNARMED' then
-			table.insert(elements, {
-				label = weaponList[i].label,
-				value = weaponList[i].name
-			})
-		end
-	end
-
-	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'armory_put_weapon', {
-		title    = _U('put_weapon_menu'),
-		align    = 'top-left',
-		elements = elements
-	}, function(data, menu)
-		menu.close()
-
-		ESX.TriggerServerCallback('esx_policejob:addArmoryWeapon', function()
-			OpenPutWeaponMenu()
-		end, data.current.value, true)
-	end, function(data, menu)
-		menu.close()
-	end)
-end
-
-function OpenBuyWeaponsMenu()
-	local elements = {}
-	local playerPed = PlayerPedId()
-
-	for k,v in ipairs(Config.AuthorizedWeapons[ESX.PlayerData.job.grade_name]) do
-		local weaponNum, weapon = ESX.GetWeapon(v.weapon)
-		local components, label = {}
-		local hasWeapon = HasPedGotWeapon(playerPed, GetHashKey(v.weapon), false)
-
-		if v.components then
-			for i=1, #v.components do
-				if v.components[i] then
-					local component = weapon.components[i]
-					local hasComponent = HasPedGotWeaponComponent(playerPed, GetHashKey(v.weapon), component.hash)
-
-					if hasComponent then
-						label = ('%s: <span style="color:green;">%s</span>'):format(component.label, _U('armory_owned'))
-					else
-						if v.components[i] > 0 then
-							label = ('%s: <span style="color:green;">%s</span>'):format(component.label, _U('armory_item', ESX.Math.GroupDigits(v.components[i])))
-						else
-							label = ('%s: <span style="color:green;">%s</span>'):format(component.label, _U('armory_free'))
-						end
-					end
-
-					table.insert(components, {
-						label = label,
-						componentLabel = component.label,
-						hash = component.hash,
-						name = component.name,
-						price = v.components[i],
-						hasComponent = hasComponent,
-						componentNum = i
-					})
-				end
-			end
-		end
-
-		if hasWeapon and v.components then
-			label = ('%s: <span style="color:green;">></span>'):format(weapon.label)
-		elseif hasWeapon and not v.components then
-			label = ('%s: <span style="color:green;">%s</span>'):format(weapon.label, _U('armory_owned'))
-		else
-			if v.price > 0 then
-				label = ('%s: <span style="color:green;">%s</span>'):format(weapon.label, _U('armory_item', ESX.Math.GroupDigits(v.price)))
-			else
-				label = ('%s: <span style="color:green;">%s</span>'):format(weapon.label, _U('armory_free'))
-			end
-		end
-
-		table.insert(elements, {
-			label = label,
-			weaponLabel = weapon.label,
-			name = weapon.name,
-			components = components,
-			price = v.price,
-			hasWeapon = hasWeapon
-		})
-	end
-
-	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'armory_buy_weapons', {
-		title    = _U('armory_weapontitle'),
-		align    = 'top-left',
-		elements = elements
-	}, function(data, menu)
-		if data.current.hasWeapon then
-			if #data.current.components > 0 then
-				OpenWeaponComponentShop(data.current.components, data.current.name, menu)
-			end
-		else
-			ESX.TriggerServerCallback('esx_policejob:buyWeapon', function(bought)
-				if bought then
-					if data.current.price > 0 then
-						ESX.ShowNotification(_U('armory_bought', data.current.weaponLabel, ESX.Math.GroupDigits(data.current.price)))
-					end
-
-					menu.close()
-					OpenBuyWeaponsMenu()
-				else
-					ESX.ShowNotification(_U('armory_money'))
-				end
-			end, data.current.name, 1)
-		end
-	end, function(data, menu)
-		menu.close()
-	end)
-end
-
-function OpenWeaponComponentShop(components, weaponName, parentShop)
-	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'armory_buy_weapons_components', {
-		title    = _U('armory_componenttitle'),
-		align    = 'top-left',
-		elements = components
-	}, function(data, menu)
-		if data.current.hasComponent then
-			ESX.ShowNotification(_U('armory_hascomponent'))
-		else
-			ESX.TriggerServerCallback('esx_policejob:buyWeapon', function(bought)
-				if bought then
-					if data.current.price > 0 then
-						ESX.ShowNotification(_U('armory_bought', data.current.componentLabel, ESX.Math.GroupDigits(data.current.price)))
-					end
-
-					menu.close()
-					parentShop.close()
-					OpenBuyWeaponsMenu()
-				else
-					ESX.ShowNotification(_U('armory_money'))
-				end
-			end, weaponName, 2, data.current.componentNum)
-		end
-	end, function(data, menu)
-		menu.close()
-	end)
-end
-
-function OpenGetStocksMenu()
-	ESX.TriggerServerCallback('esx_policejob:getStockItems', function(items)
-		local elements = {}
-
-		for i=1, #items, 1 do
-			table.insert(elements, {
-				label = 'x' .. items[i].count .. ' ' .. items[i].label,
-				value = items[i].name
-			})
-		end
-
-		ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'stocks_menu', {
-			title    = _U('police_stock'),
-			align    = 'top-left',
-			elements = elements
-		}, function(data, menu)
-			local itemName = data.current.value
-
-			ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'stocks_menu_get_item_count', {
-				title = _U('quantity')
-			}, function(data2, menu2)
-				local count = tonumber(data2.value)
-
-				if not count then
-					ESX.ShowNotification(_U('quantity_invalid'))
-				else
-					menu2.close()
-					menu.close()
-					TriggerServerEvent('esx_policejob:getStockItem', itemName, count)
-
-					Citizen.Wait(300)
-					OpenGetStocksMenu()
-				end
-			end, function(data2, menu2)
-				menu2.close()
-			end)
-		end, function(data, menu)
-			menu.close()
-		end)
-	end)
-end
-
-function OpenPutStocksMenu()
-	ESX.TriggerServerCallback('esx_policejob:getPlayerInventory', function(inventory)
-		local elements = {}
-
-		for i=1, #inventory.items, 1 do
-			local item = inventory.items[i]
-
-			if item.count > 0 then
-				table.insert(elements, {
-					label = item.label .. ' x' .. item.count,
-					type = 'item_standard',
-					value = item.name
-				})
-			end
-		end
-
-		ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'stocks_menu', {
-			title    = _U('inventory'),
-			align    = 'top-left',
-			elements = elements
-		}, function(data, menu)
-			local itemName = data.current.value
-
-			ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'stocks_menu_put_item_count', {
-				title = _U('quantity')
-			}, function(data2, menu2)
-				local count = tonumber(data2.value)
-
-				if not count then
-					ESX.ShowNotification(_U('quantity_invalid'))
-				else
-					menu2.close()
-					menu.close()
-					TriggerServerEvent('esx_policejob:putStockItems', itemName, count)
-
-					Citizen.Wait(300)
-					OpenPutStocksMenu()
-				end
-			end, function(data2, menu2)
-				menu2.close()
-			end)
-		end, function(data, menu)
-			menu.close()
-		end)
-	end)
 end
 
 RegisterNetEvent('esx:setJob')

@@ -2,10 +2,11 @@ local HasAlreadyEnteredMarker, IsInShopMenu = false, false
 local CurrentAction, CurrentActionMsg, LastZone, currentDisplayVehicle, CurrentVehicleData
 local CurrentActionData, Vehicles, Categories = {}, {}, {}
 
-function getVehicleLabelFromModel(model)
-	for k,v in ipairs(Vehicles) do
-		if v.model == model then
-			return v.name
+function getVehicleFromModel(model)
+	for i = 1, #Vehicles do
+		local vehicle = Vehicles[i]
+		if vehicle.model == model then
+			return vehicle
 		end
 	end
 
@@ -82,7 +83,7 @@ function ReturnVehicleProvider()
 
 		for k,v in ipairs(vehicles) do
 			local returnPrice = ESX.Math.Round(v.price * 0.75)
-			local vehicleLabel = getVehicleLabelFromModel(v.vehicle)
+			local vehicleLabel = getVehicleFromModel(v.vehicle).label
 
 			table.insert(elements, {
 				label = ('%s [<span style="color:orange;">%s</span>]'):format(vehicleLabel, _U('generic_shopitem', ESX.Math.GroupDigits(returnPrice))),
@@ -143,7 +144,7 @@ function OpenShopMenu()
 	end
 
 	for i=1, #Vehicles, 1 do
-		if IsModelInCdimage(GetHashKey(Vehicles[i].model)) then
+		if IsModelInCdimage(joaat(Vehicles[i].model)) then
 			table.insert(vehiclesByCategory[Vehicles[i].category], Vehicles[i])
 		else
 			print(('[esx_vehicleshop] [^3ERROR^7] Vehicle "%s" does not exist'):format(Vehicles[i].model))
@@ -289,7 +290,7 @@ function OpenShopMenu()
 end
 
 function WaitForVehicleToLoad(modelHash)
-	modelHash = (type(modelHash) == 'number' and modelHash or GetHashKey(modelHash))
+	modelHash = (type(modelHash) == 'number' and modelHash or joaat(modelHash))
 
 	if not HasModelLoaded(modelHash) then
 		RequestModel(modelHash)
@@ -306,6 +307,8 @@ function WaitForVehicleToLoad(modelHash)
 		BusyspinnerOff()
 	end
 end
+
+local ox_inventory = exports.ox_inventory
 
 function OpenResellerMenu()
 	ESX.UI.Menu.CloseAll()
@@ -329,10 +332,8 @@ function OpenResellerMenu()
 
 		if action == 'buy_vehicle' then
 			OpenShopMenu()
-		elseif action == 'put_stock' then
-			OpenPutStocksMenu()
-		elseif action == 'get_stock' then
-			OpenGetStocksMenu()
+		elseif action == 'put_stock' or action == 'get_stock'then
+			ox_inventory:openInventory('stash', 'society_cardealer')
 		elseif action == 'pop_vehicle' then
 			OpenPopVehicleMenu()
 		elseif action == 'depop_vehicle' then
@@ -543,93 +544,6 @@ function OpenBossActionsMenu()
 		CurrentAction     = 'boss_actions_menu'
 		CurrentActionMsg  = _U('shop_menu')
 		CurrentActionData = {}
-	end)
-end
-
-function OpenGetStocksMenu()
-	ESX.TriggerServerCallback('esx_vehicleshop:getStockItems', function(items)
-		local elements = {}
-
-		for i=1, #items, 1 do
-			if items[i].count > 0 then
-				table.insert(elements, {
-					label = 'x' .. items[i].count .. ' ' .. items[i].label,
-					value = items[i].name
-				})
-			end
-		end
-
-		ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'stocks_menu', {
-			title    = _U('dealership_stock'),
-			align    = 'top-left',
-			elements = elements
-		}, function(data, menu)
-			local itemName = data.current.value
-
-			ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'stocks_menu_get_item_count', {
-				title = _U('amount')
-			}, function(data2, menu2)
-				local count = tonumber(data2.value)
-
-				if count == nil then
-					ESX.ShowNotification(_U('quantity_invalid'))
-				else
-					TriggerServerEvent('esx_vehicleshop:getStockItem', itemName, count)
-					menu2.close()
-					menu.close()
-					OpenGetStocksMenu()
-				end
-			end, function(data2, menu2)
-				menu2.close()
-			end)
-		end, function(data, menu)
-			menu.close()
-		end)
-	end)
-end
-
-function OpenPutStocksMenu()
-	ESX.TriggerServerCallback('esx_vehicleshop:getPlayerInventory', function(inventory)
-		local elements = {}
-
-		for i=1, #inventory.items, 1 do
-			local item = inventory.items[i]
-
-			if item.count > 0 then
-				table.insert(elements, {
-					label = item.label .. ' x' .. item.count,
-					type = 'item_standard',
-					value = item.name
-				})
-			end
-		end
-
-		ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'stocks_menu', {
-			title    = _U('inventory'),
-			align    = 'top-left',
-			elements = elements
-		}, function(data, menu)
-			local itemName = data.current.value
-
-			ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'stocks_menu_put_item_count', {
-				title = _U('amount')
-			}, function(data2, menu2)
-				local count = tonumber(data2.value)
-
-				if count == nil then
-					ESX.ShowNotification(_U('quantity_invalid'))
-				else
-					TriggerServerEvent('esx_vehicleshop:putStockItems', itemName, count)
-					menu2.close()
-					menu.close()
-					OpenPutStocksMenu()
-				end
-			end, function(data2, menu2)
-				menu2.close()
-			end)
-		end, function(data, menu)
-			menu.close()
-		end)
 	end)
 end
 

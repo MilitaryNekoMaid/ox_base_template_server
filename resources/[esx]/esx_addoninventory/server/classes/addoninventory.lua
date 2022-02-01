@@ -80,3 +80,4 @@ function CreateAddonInventory(name, owner, items)
 
 	return self
 end
+

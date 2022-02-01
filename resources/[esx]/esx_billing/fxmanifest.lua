@@ -4,10 +4,12 @@ game 'gta5'
 
 description 'ESX Billing'
 
-version '1.2.0'
+version 'legacy'
+
+shared_script '@es_extended/imports.lua'
 
 server_scripts {
-	'@mysql-async/lib/MySQL.lua',
+	'@oxmysql/lib/MySQL.lua',
 	'@es_extended/locale.lua',
 	'locales/de.lua',
 	'locales/br.lua',

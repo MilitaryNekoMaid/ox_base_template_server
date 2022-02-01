@@ -2,14 +2,14 @@ fx_version 'adamant'
 
 game 'gta5'
 
-description 'ESX Addon Inventory'
+description 'ESX Addon Account'
 
 version 'legacy'
 
 server_scripts {
 	'@es_extended/imports.lua',
 	'@oxmysql/lib/MySQL.lua',
-	'server/classes/addoninventory.lua',
+	'server/classes/addonaccount.lua',
 	'server/main.lua'
 }
 
