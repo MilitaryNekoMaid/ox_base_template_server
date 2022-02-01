@@ -1,10 +1,9 @@
 fx_version 'cerulean'
+game 'gta5'
 
 name 'qidentification'
-description 'Identification cards script built to work with linden_inventory'
-
 author 'Noms'
-game 'gta5'
+description 'Identification cards script built to work with ox_inventory'
 
 
 ui_page 'html/index.html'

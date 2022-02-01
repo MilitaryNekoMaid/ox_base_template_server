@@ -15,7 +15,7 @@ p {
 }
 
 #mugshot {
-  height: 135px;
+  height: 165px;
   width: 126px;
 }
 
@@ -31,40 +31,40 @@ p {
 }
 img {
   position: absolute;
-  left: 7px;
-  top: 6px;
+  left:6px;
+  top:41px;
 }
 #idnum {
   font-weight: bolder;
   font-size: 18px;
-  color: #FFFFFF;
+  color: #282828;
   position: absolute;
-  top: 140px;
-  left: 45px;
+  top: 40px;
+  left: 190px;
 }
 #expiry {
   font-weight: bolder;
-  font-size: 12px;
-  color: #e74c3c;
+  font-size: 18px;
+  color: #282828;
   position: absolute;
-  top: 200px;
-  left: 146px;
+  top: 79px;
+  left: 190px;
 }
 #name {
   font-weight: bolder;
   font-size: 18px;
-  color: #FFFFFF;
+  color: #282828;
   position: absolute;
-  top: 60px;
-  left: 145px;
+  top: 105px;
+  left: 190px;
 }
 #fname {
   font-weight: bolder;
   font-size: 18px;
-  color: #FFFFFF;
+  color: #282828;
   position: absolute;
-  top: 42px;
-  left: 145px;
+  top: 131px;
+  left: 190px;
 }
 #inline {
   position: absolute;
@@ -72,32 +72,32 @@ img {
 }
 #dob {
   position: absolute;
-  left: 144px;
-  top: 109px;
-  font-weight: bold;
-  font-size: 12px;
-  color: #FFFFFF;
+  left: 190px;
+  top: 182px;
+  font-weight: bolder;
+  font-size: 18px;
+  color: #282828;
   width: 100px;
 }
 #sex {
   position: absolute;
   color: #b34949;
   font-weight: bolder;
-  left: 235px;
-  top: 109px;
+  left: 245px;
+  top: 210px;
 }
 #height {
   position: absolute;
   color: #b34949;
   font-weight: bolder;
-  left: 294px;
-  top: 109px;
+  left: 245px;
+  top: 223px;
 }
 #signature {
   position: absolute;
-  bottom: 79px;
-  left: 152px;
-  color: #FFFFFF;
+  bottom: 30px;
+  left: 15px;
+  color: #272727;
   font-weight: bolder;
   font-size: 19px;
   text-transform:capitalize;

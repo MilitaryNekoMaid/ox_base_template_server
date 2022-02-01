@@ -82,9 +82,9 @@ return {
         weight = 50,
         stack = false,
         close = true,
-        consume = 0,
-        client = {
-            export = "qidentification.Showdrivers_license"
+		consume = 0,
+		client = {
+			export = 'qidentification.identification'
         }
     },
 
@@ -93,9 +93,9 @@ return {
         weight = 50,
         stack = false,
         close = true,
-        consume = 0,
-        client = {
-            export = "qidentification.Showidentification"
+		consume = 0,
+		client = {
+			export = 'qidentification.identification'
         }
     },
 
@@ -104,9 +104,9 @@ return {
         weight = 50,
         stack = false,
         close = true,
-        consume = 0,
-        client = {
-            export = "qidentification.Showfirearms_license"
+		consume = 0,
+		client = {
+			export = 'qidentification.identification'
         }
     },
 

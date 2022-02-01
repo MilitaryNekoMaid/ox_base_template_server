@@ -3,7 +3,7 @@ RegisterServerEvent('qidentification:server:showID')
 AddEventHandler('qidentification:server:showID', function(item, players)
 	if #players > 0 then 
 		for _,player in pairs(players) do 
-			TriggerClientEvent('qidentification:openID',item)
+			TriggerClientEvent('qidentification:openID', player, item)
 		end 
 	end 
 end)
@@ -41,7 +41,6 @@ AddEventHandler('qidentification:createCard', function(source,url,type)
 			end
 		end)
 		TriggerEvent('esx_license:addLicense', source, 'drive', function()
-			--cb('bought_weapon_license')
 		end)
 	elseif type == "firearms_license" then 
 		MySQL.Async.fetchAll('SELECT type FROM user_licenses WHERE owner = @identifier', {['@identifier'] = xPlayer.identifier},
@@ -53,7 +52,6 @@ AddEventHandler('qidentification:createCard', function(source,url,type)
 			end
 		end)
 			TriggerEvent('esx_license:addLicense', source, 'weapon', function()
-				--cb('bought_weapon_license')
 			end)
 	end
 	xPlayer.addInventoryItem(type, 1, card_metadata)
