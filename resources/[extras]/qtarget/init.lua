@@ -81,7 +81,7 @@ CreateThread(function()
 				if job and ESX.PlayerData.job.grade >= job then
 					return true
 				end
-			elseif job == ESX.PlayerData.job.name then
+			elseif job == ESX.PlayerData.job.name or job == 'all' then
 				return true
 			end
 			return false
@@ -115,10 +115,10 @@ CreateThread(function()
 		JobCheck = function(job)
 			if type(job) == 'table' then
 				job = job[PlayerData.job.name]
-				if PlayerData.job.grade >= job then
+				if PlayerData.job.grade.level >= job then
 					return true
 				end
-			elseif job == (PlayerData.job.name or 'all') then
+			elseif job == PlayerData.job.name or job == 'all' then
 				return true
 			end
 			return false
@@ -127,10 +127,10 @@ CreateThread(function()
 		GangCheck = function(gang)
 			if type(gang) == 'table' then
 				gang = gang[PlayerData.gang.name]
-				if PlayerData.gang.grade >= gang then
+				if PlayerData.gang.grade.level >= gang then
 					return true
 				end
-			elseif gang == (PlayerData.gang.name or 'all') then
+			elseif gang == PlayerData.gang.name or gang == 'all' then
 				return true
 			end
 			return false
